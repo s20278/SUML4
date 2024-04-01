@@ -20,10 +20,10 @@ def main():
     # Wybór cech przez użytkownika
     pclass_radio = st.radio("Klasa", list(pclass_d.keys()), format_func=lambda x: pclass_d[x])
     sex_radio = st.radio("Płeć", list(sex_d.keys()), format_func=lambda x: sex_d[x])
-    age_slider = st.slider("Wiek", min_value=1, max_value=70.5)
-    sibsp_slider = st.slider("Liczba rodzeństwa i/lub partnera", min_value=0, max_value=8)
-    parch_slider = st.slider("Liczba rodziców i/lub dzieci", min_value=0, max_value=6)
-    fare_slider = st.slider("Cena biletu", min_value=0, max_value=93.5, step=1)
+    age_slider = st.slider("Wiek", min_value=1, max_value=70, step=1)  # Zmiana max_value na int
+    sibsp_slider = st.slider("Liczba rodzeństwa i/lub partnera", min_value=0, max_value=8, step=1)
+    parch_slider = st.slider("Liczba rodziców i/lub dzieci", min_value=0, max_value=6, step=1)
+    fare_slider = st.slider("Cena biletu", min_value=0, max_value=93, step=1)  # Zmiana max_value na int
     embarked_radio = st.radio("Port zaokrętowania", list(embarked_d.keys()), index=2, format_func=lambda x: embarked_d[x])
 
     # Przygotowanie danych do predykcji
