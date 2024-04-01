@@ -52,4 +52,4 @@ def main():
         st.write("Pewność predykcji {0:.2f} %".format(s_confidence[0][survival][0] * 100))
 
 if __name__ == "__main__":
-    main()a
+    main()
