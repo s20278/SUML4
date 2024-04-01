@@ -19,7 +19,7 @@ def main():
     st.title("Titanic Survival Predictor")
 
 # Dodanie zdjęcia
-st.image("https://www.merkur.de/assets/images/28/580/28580509-vor-110-jahren-sank-die-titanic-2ufe.jpg", caption="Statek Titanic")
+st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/RMS_Titanic_3.jpg/250px-RMS_Titanic_3.jpg", caption="Statek Titanic")
 
 
     # Wybór cech przez użytkownika
