@@ -31,6 +31,7 @@ def main():
 
     # Przygotowanie danych do predykcji
     input_df = pd.DataFrame({
+        'Survived': [None],  # Domyślnie brak wartości, będzie zastąpiona przez model
         'Pclass': [pclass_radio],
         'Sex': [sex_radio],
         'Age': [age_slider],
@@ -45,9 +46,6 @@ def main():
 
     # Przekonwertowanie ramki danych na tablicę numpy
     input_data = input_df.values
-
-    # Pobranie nazw cech
-    feature_names = input_df.columns.tolist()
 
     # Predykcja
     survival = model.predict(input_data)
