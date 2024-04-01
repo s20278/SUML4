@@ -1,55 +1,46 @@
 import streamlit as st
-import joblib
-from datetime import datetime
+import pickle
+import pandas as pd
 
-# import znanych nam bibliotek
-import pathlib
-from pathlib import Path
+# Wczytanie wytrenowanego modelu
+model_filename = "model.pkl"
+model = pickle.load(open(model_filename, 'rb'))
 
-temp = pathlib.PosixPath
-pathlib.PosixPath = pathlib.WindowsPath
+# Słowniki dla konwersji klas, płci i portów zaokrętowania
+pclass_d = {1: "Pierwsza", 2: "Druga", 3: "Trzecia"}
+sex_d = {"male": "Mężczyzna", "female": "Kobieta"}
+embarked_d = {"C": "Cherbourg", "Q": "Queenstown", "S": "Southampton"}
 
-filename = "model.sv"
-# Wczytanie modelu za pomocą joblib.load
-model = joblib.load(filename)
-
-# Pozostała część skryptu pozostaje bez zmian
-
-pclass_d = {1: "Pierwsza", 2: "Druga", 3: "Trzecia"}  
-embarked_d = {"C":"Cherbourg", "Q":"Queenstown", "S":"Southampton"}
-sex_d = {"female": "Kobieta", "male": "Mężczyzna"}
+# Wczytanie danych z pliku CSV
+data_filename = "DSP_1.csv"
+data = pd.read_csv(data_filename)
 
 def main():
     st.set_page_config(page_title="Titanic Survival Predictor")
-    overview = st.container()
-    left, right = st.columns(2)
-    prediction = st.container()
+    st.title("Titanic Survival Predictor")
 
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/RMS_Titanic_3.jpg/300px-RMS_Titanic_3.jpg")
+    st.sidebar.title("Parametry podróżnika")
+    pclass_radio = st.sidebar.radio("Klasa", data['Pclass'].unique(), format_func=lambda x: pclass_d[x])
+    sex_radio = st.sidebar.radio("Płeć", data['Sex'].unique(), format_func=lambda x: sex_d[x])
+    age_slider = st.sidebar.slider("Wiek", min_value=int(data['Age'].min()), max_value=int(data['Age'].max()), value=int(data['Age'].mean()))
+    sibsp_slider = st.sidebar.slider("Liczba rodzeństwa i/lub partnera", min_value=int(data['SibSp'].min()), max_value=int(data['SibSp'].max()))
+    parch_slider = st.sidebar.slider("Liczba rodziców i/lub dzieci", min_value=int(data['Parch'].min()), max_value=int(data['Parch'].max()))
+    fare_slider = st.sidebar.slider("Cena biletu", min_value=data['Fare'].min(), max_value=data['Fare'].max(), value=data['Fare'].mean())
+    embarked_radio = st.sidebar.radio("Port zaokrętowania", data['Embarked'].unique(), format_func=lambda x: embarked_d[x])
 
-    with overview:
-        st.title("Titanic Survival Predictor")
+    # Przewidywanie przeżycia na podstawie danych użytkownika
+    user_data = [[pclass_radio, sex_radio, age_slider, sibsp_slider, parch_slider, fare_slider, embarked_radio]]
+    prediction = model.predict(user_data)[0]
+    probability = model.predict_proba(user_data)[0][prediction]
 
-    with left:
-        pclass_radio = st.radio("Klasa", list(pclass_d.keys()), format_func=lambda x: pclass_d[x])  
-        sex_radio = st.radio("Płeć", list(sex_d.keys()), format_func=lambda x: sex_d[x])
+    st.subheader("Wynik predykcji")
+    if prediction == 1:
+        st.write("Osoba przetrwała.")
+    else:
+        st.write("Osoba nie przetrwała.")
 
-    with right:
-        age_slider = st.slider("Wiek", min_value=1, max_value=70.5)
-        sibsp_slider = st.slider("Liczba rodzeństwa i/lub partnera", min_value=0, max_value=8)
-        parch_slider = st.slider("Liczba rodziców i/lub dzieci", min_value=0, max_value=6)
-        fare_slider = st.slider("Cena biletu", min_value=0, max_value=93.5, step=1)
+    st.write(f"Prawdopodobieństwo przetrwania: {probability:.2f}")
 
-    embarked_radio = st.radio("Port zaokrętowania", list(embarked_d.keys()), index=2, format_func=lambda x: embarked_d[x])
-
-    data = [[pclass_radio, sex_radio, age_slider, sibsp_slider, parch_slider, fare_slider, embarked_radio]]
-    survival = model.predict(data)
-    s_confidence = model.predict_proba(data)
-
-    with prediction:
-        st.subheader("Czy taka osoba przeżyłaby katastrofę?")
-        st.subheader(("Tak" if survival[0] == 1 else "Nie"))
-        st.write("Pewność predykcji {0:.2f} %".format(s_confidence[0][survival][0] * 100))
 
 if __name__ == "__main__":
     main()
