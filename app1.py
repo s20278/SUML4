@@ -44,6 +44,9 @@ def main():
     # Przekonwertowanie ramki danych na tablicę numpy
     input_data = input_df.values
 
+    # Pobranie nazw cech
+    feature_names = input_df.columns.tolist()
+
     # Predykcja
     survival = model.predict(input_data)
     s_confidence = model.predict_proba(input_data)
