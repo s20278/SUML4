@@ -1,6 +1,7 @@
 import streamlit as st
 import pickle
 import pandas as pd
+from sklearn.impute import SimpleImputer
 
 # Wczytanie wytrenowanego modelu
 model_filename = "model.pkl"
@@ -31,7 +32,6 @@ def main():
 
     # Przygotowanie danych do predykcji
     input_df = pd.DataFrame({
-        'Survived': [None],  # Domyślnie brak wartości, będzie zastąpiona przez model
         'Pclass': [pclass_radio],
         'Sex': [sex_radio],
         'Age': [age_slider],
@@ -41,11 +41,19 @@ def main():
         'Embarked': [embarked_radio]
     })
 
+    # Imputacja brakujących wartości dla kolumn numerycznych
+    numeric_cols = ['Age', 'SibSp', 'Parch', 'Fare']
+    imputer = SimpleImputer(strategy='mean')
+    input_df[numeric_cols] = imputer.fit_transform(input_df[numeric_cols])
+
     # Wykonanie kodowania kategorycznego
     input_df = pd.get_dummies(input_df, columns=['Sex', 'Embarked'])
 
     # Przekonwertowanie ramki danych na tablicę numpy
     input_data = input_df.values
+
+    # Pobranie nazw cech
+    feature_names = input_df.columns.tolist()
 
     # Predykcja
     survival = model.predict(input_data)
