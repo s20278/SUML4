@@ -1,5 +1,6 @@
 import streamlit as st
 import pickle
+import pandas as pd
 
 # Wczytanie wytrenowanego modelu
 model_filename = "model.pkl"
@@ -27,7 +28,21 @@ def main():
     embarked_radio = st.radio("Port zaokrętowania", list(embarked_d.keys()), index=2, format_func=lambda x: embarked_d[x])
 
     # Przygotowanie danych do predykcji
-    input_data = [[pclass_radio, sex_radio, age_slider, sibsp_slider, parch_slider, fare_slider, embarked_radio]]
+    input_df = pd.DataFrame({
+        'Pclass': [pclass_radio],
+        'Sex': [sex_radio],
+        'Age': [age_slider],
+        'SibSp': [sibsp_slider],
+        'Parch': [parch_slider],
+        'Fare': [fare_slider],
+        'Embarked': [embarked_radio]
+    })
+
+    # Wykonanie kodowania kategorycznego
+    input_df = pd.get_dummies(input_df, columns=['Sex', 'Embarked'])
+
+    # Przekonwertowanie ramki danych na tablicę numpy
+    input_data = input_df.values
 
     # Predykcja
     survival = model.predict(input_data)
