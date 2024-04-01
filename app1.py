@@ -1,68 +1,43 @@
-import streamlit as st
-import pickle
+import numpy as np
+import tkinter as tk
 import pandas as pd
-from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+import pickle
 
-# Wczytanie wytrenowanego modelu
-model_filename = "model.pkl"
-with open(model_filename, 'rb') as file:
-    model = pickle.load(file)
 
-# Słowniki do mapowania wartości na czytelne etykiety
-pclass_d = {1: "Pierwsza", 2: "Druga", 3: "Trzecia"}
-embarked_d = {"C": "Cherbourg", "Q": "Queenstown", "S": "Southampton"}
-sex_d = {"female": "Kobieta", "male": "Mężczyzna"}
+# main
+
+root = tk.Tk()
+canvas = tk.Canvas(root, width=300, height=300)
+canvas.pack()
 
 def main():
-    st.set_page_config(page_title="Titanic Survival Predictor")
+    label = tk.Label(root, text='Obliczenia zostały przeprowadzone', fg='green', font=('calibri', 10))
+    canvas.create_window(130, 200, window=label)
+    randnums = np.random.randint(0, 6, size=(2, 4))
+    print(randnums, end='\n\n')
 
-    st.title("Titanic Survival Predictor")
+    base_data = pd.read_csv("DSP_1.csv")
+    cols = ["Survived", "Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
+    data = base_data[cols].copy()
+    data["Age"].fillna((data["Age"].mean()), inplace=True)
+    data.dropna(subset=['Embarked'], inplace=True)
+    encoder = LabelEncoder()
+    data.loc[:,"Sex"] = encoder.fit_transform(data.loc[:,"Sex"])
+    data.loc[:,"Embarked"] = encoder.fit_transform(data.loc[:,"Embarked"])
+    y_train = data.iloc[0:600:,0]
+    y_test = data.iloc[600:700:,0]
+    X_train = data.iloc[0:600:,1:8]
+    X_test = data.iloc[600:700:,1:8]
+    model = RandomForestClassifier(criterion='gini', n_estimators=20, max_depth=7)
+    model.fit(X_train, y_train)
+    acc = accuracy_score(model.predict(X_test), y_test)
+    print(f'Model accuracy: {acc*100:.2f} %')
+    pickle.dump(model, open('./model.sv', 'wb'))
 
-    # Dodanie zdjęcia
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/RMS_Titanic_3.jpg/250px-RMS_Titanic_3.jpg", caption="Statek Titanic")
+button = tk.Button(root, text='Generuj', bd=5, command=main, bg='green', fg='white')
+canvas.create_window(150, 150, window=button)
 
-    # Wybór cech przez użytkownika
-    pclass_radio = st.radio("Klasa", list(pclass_d.keys()), format_func=lambda x: pclass_d[x])
-    sex_radio = st.radio("Płeć", list(sex_d.keys()), format_func=lambda x: sex_d[x])
-    age_slider = st.slider("Wiek", min_value=1, max_value=70, step=1)  # Zmiana max_value na int
-    sibsp_slider = st.slider("Liczba rodzeństwa i/lub partnera", min_value=0, max_value=8, step=1)
-    parch_slider = st.slider("Liczba rodziców i/lub dzieci", min_value=0, max_value=6, step=1)
-    fare_slider = st.slider("Cena biletu", min_value=0, max_value=93, step=1)  # Zmiana max_value na int
-    embarked_radio = st.radio("Port zaokrętowania", list(embarked_d.keys()), index=2, format_func=lambda x: embarked_d[x])
-
-    # Przygotowanie danych do predykcji
-    input_df = pd.DataFrame({
-        'Pclass': [pclass_radio],
-        'Sex': [sex_radio],
-        'Age': [age_slider],
-        'SibSp': [sibsp_slider],
-        'Parch': [parch_slider],
-        'Fare': [fare_slider],
-        'Embarked': [embarked_radio]
-    })
-
-    # Imputacja brakujących wartości dla kolumn numerycznych
-    numeric_cols = ['Age', 'SibSp', 'Parch', 'Fare']
-    imputer = SimpleImputer(strategy='mean')
-    input_df[numeric_cols] = imputer.fit_transform(input_df[numeric_cols])
-
-    # Wykonanie kodowania kategorycznego
-    input_df = pd.get_dummies(input_df, columns=['Sex', 'Embarked'])
-
-    # Przekonwertowanie ramki danych na tablicę numpy
-    input_data = input_df.values
-
-    # Pobranie nazw cech
-    feature_names = input_df.columns.tolist()
-
-    # Predykcja
-    survival = model.predict(input_data)
-    s_confidence = model.predict_proba(input_data)
-
-    # Wyświetlenie wyników
-    st.subheader("Czy taka osoba przeżyłaby katastrofę?")
-    st.subheader("Tak" if survival[0] == 1 else "Nie")
-    st.write("Pewność predykcji: {0:.2f} %".format(s_confidence[0][survival][0] * 100))
-
-if __name__ == "__main__":
-    main()
+root.mainloop()
