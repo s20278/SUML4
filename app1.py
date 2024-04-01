@@ -18,6 +18,10 @@ def main():
 
     st.title("Titanic Survival Predictor")
 
+# Dodanie zdjęcia
+st.image("https://www.merkur.de/assets/images/28/580/28580509-vor-110-jahren-sank-die-titanic-2ufe.jpg", caption="Statek Titanic")
+
+
     # Wybór cech przez użytkownika
     pclass_radio = st.radio("Klasa", list(pclass_d.keys()), format_func=lambda x: pclass_d[x])
     sex_radio = st.radio("Płeć", list(sex_d.keys()), format_func=lambda x: sex_d[x])
