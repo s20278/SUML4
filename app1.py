@@ -35,7 +35,7 @@ def main():
 
     with right:
         age_slider = st.slider("Wiek", min_value=1, max_value=100)  # Zwiększony zakres wieku
-        sibsp_slider = st.slider("Liczba rodzeństwa i/lub partnera", min_value=0, max_value=8)
+        sibsp_slider = st.slider("Liczba rodzeństwa i/lub partnera", min_value=0, max_value=10)
         parch_slider = st.slider("Liczba rodziców i/lub dzieci", min_value=0, max_value=6)
         fare_slider = st.slider("Cena biletu", min_value=0, max_value=513, step=1)  # Zwiększony zakres ceny biletu
 
